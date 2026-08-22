@@ -1,7 +1,19 @@
-node_modules/
+# Backend
 venv/
-.env
 __pycache__/
 *.pyc
 .DS_Store
 scripts/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+out/
+dist/
