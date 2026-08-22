@@ -55,24 +55,31 @@ export default function ResidentDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
       <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <Home className="h-6 w-6 text-blue-600" />
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
-              <button
-                onClick={logout}
-                className="text-sm text-red-600 hover:text-red-700"
-              >
-                Logout
-              </button>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <Home className="h-6 w-6 text-blue-600" />
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          </div>
+          <div className="flex items-center space-x-6">
+            <Link 
+              href="/resident/notices" 
+              className="text-sm text-yellow-600 hover:text-yellow-800 font-medium flex items-center"
+            >
+              <Bell className="h-4 w-4 mr-1" />
+              Notice Board
+            </Link>
+            <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
+            <button
+              onClick={logout}
+              className="text-sm text-red-600 hover:text-red-700"
+            >
+              Logout
+            </button>
           </div>
         </div>
-      </nav>
+      </div>
+    </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Important Notices */}
@@ -113,7 +120,7 @@ export default function ResidentDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Link
             href="/resident/complaints/create"
             className="bg-white rounded-xl shadow-md p-8 hover:bg-blue-50 border-2 border-dashed border-gray-300 flex items-center justify-center transition-colors"
@@ -127,6 +134,13 @@ export default function ResidentDashboard() {
           >
             <Clock className="h-8 w-8 text-gray-600 mr-2" />
             <span className="text-lg font-medium text-gray-600">View All Complaints</span>
+          </Link>
+          <Link
+            href="/resident/notices"
+            className="bg-white rounded-xl shadow-md p-8 hover:bg-yellow-50 border-2 border-dashed border-gray-300 flex items-center justify-center transition-colors"
+          >
+            <Bell className="h-8 w-8 text-yellow-600 mr-2" />
+            <span className="text-lg font-medium text-yellow-600">Notice Board</span>
           </Link>
         </div>
 

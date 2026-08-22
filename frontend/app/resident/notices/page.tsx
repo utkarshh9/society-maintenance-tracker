@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '../../context/AuthContext'
 import apiService from '../../../src/lib/api'
 import { Notice } from '../../../src/types'
-import { ArrowLeft, Bell, Star } from 'lucide-react'
+import { ArrowLeft, Bell, Star, Home } from 'lucide-react'
 
 export default function ResidentNotices() {
   const { user, logout } = useAuth()
@@ -31,8 +31,26 @@ export default function ResidentNotices() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-gray-900">Notice Board</h1>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
+                <button
+                  onClick={logout}
+                  className="text-sm text-red-600 hover:text-red-700"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     )
   }
@@ -46,8 +64,18 @@ export default function ResidentNotices() {
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Notice Board</h1>
+            <div className="flex items-center space-x-2">
+              <Bell className="h-6 w-6 text-yellow-600" />
+              <h1 className="text-2xl font-bold text-gray-900">Notice Board</h1>
+            </div>
             <div className="flex items-center space-x-4">
+              <Link 
+                href="/resident/dashboard" 
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center"
+              >
+                <Home className="h-4 w-4 mr-1" />
+                Dashboard
+              </Link>
               <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
               <button
                 onClick={logout}
@@ -61,14 +89,6 @@ export default function ResidentNotices() {
       </nav>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link
-          href="/resident/dashboard"
-          className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Dashboard
-        </Link>
-
         {/* Important Notices */}
         {importantNotices.length > 0 && (
           <div className="mb-6">
@@ -80,13 +100,14 @@ export default function ResidentNotices() {
               {importantNotices.map((notice) => (
                 <div
                   key={notice.id}
-                  className="bg-yellow-50 border border-yellow-200 rounded-xl p-6"
+                  className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 shadow-sm"
                 >
                   <h3 className="text-lg font-semibold text-yellow-800">{notice.title}</h3>
-                  <p className="text-yellow-700 mt-2">{notice.content}</p>
-                  <p className="text-xs text-yellow-600 mt-2">
-                    Posted on {new Date(notice.created_at).toLocaleString()}
-                  </p>
+                  <p className="text-yellow-700 mt-2 whitespace-pre-wrap">{notice.content}</p>
+                  <div className="flex justify-between items-center mt-3 text-xs text-yellow-600">
+                    <span>Posted by {notice.creator_name}</span>
+                    <span>{new Date(notice.created_at).toLocaleString()}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -112,10 +133,11 @@ export default function ResidentNotices() {
                   className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
                 >
                   <h3 className="text-lg font-semibold text-gray-900">{notice.title}</h3>
-                  <p className="text-gray-600 mt-2">{notice.content}</p>
-                  <p className="text-xs text-gray-400 mt-2">
-                    Posted on {new Date(notice.created_at).toLocaleString()}
-                  </p>
+                  <p className="text-gray-600 mt-2 whitespace-pre-wrap">{notice.content}</p>
+                  <div className="flex justify-between items-center mt-3 text-xs text-gray-400">
+                    <span>Posted by {notice.creator_name}</span>
+                    <span>{new Date(notice.created_at).toLocaleString()}</span>
+                  </div>
                 </div>
               ))}
             </div>

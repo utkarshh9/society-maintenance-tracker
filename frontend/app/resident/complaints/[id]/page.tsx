@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useAuth } from '../../../context/AuthContext'
 import apiService from '../../../../src/lib/api'
 import { Complaint } from '../../../../src/types'
-import { ArrowLeft, Clock, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Clock, CheckCircle, AlertCircle, AlertTriangle, Bell } from 'lucide-react'
 
 export default function ComplaintDetails() {
   const params = useParams()
@@ -71,7 +71,14 @@ export default function ComplaintDetails() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-bold text-gray-900">Complaint Details</h1>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-6">
+                <Link 
+                  href="/resident/notices" 
+                  className="text-sm text-yellow-600 hover:text-yellow-800 font-medium flex items-center"
+                >
+                  <Bell className="h-4 w-4 mr-1" />
+                  Notice Board
+                </Link>
                 <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
                 <button
                   onClick={logout}
@@ -103,7 +110,14 @@ export default function ComplaintDetails() {
               <h1 className="text-2xl font-bold text-gray-900">
                 {isNotFound ? 'Complaint Not Found' : 'Error'}
               </h1>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-6">
+                <Link 
+                  href="/resident/notices" 
+                  className="text-sm text-yellow-600 hover:text-yellow-800 font-medium flex items-center"
+                >
+                  <Bell className="h-4 w-4 mr-1" />
+                  Notice Board
+                </Link>
                 <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
                 <button
                   onClick={logout}
@@ -169,7 +183,14 @@ export default function ComplaintDetails() {
             <h1 className="text-2xl font-bold text-gray-900">
               Complaint #{complaint.id}
             </h1>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
+              <Link 
+                href="/resident/notices" 
+                className="text-sm text-yellow-600 hover:text-yellow-800 font-medium flex items-center"
+              >
+                <Bell className="h-4 w-4 mr-1" />
+                Notice Board
+              </Link>
               <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
               <button
                 onClick={logout}
@@ -252,7 +273,7 @@ export default function ComplaintDetails() {
             ) : (
               complaint.history.map((entry) => (
                 <div key={entry.id} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-1">
+                  <div className="shrink-0 mt-1">
                     {getStatusIcon(entry.status)}
                   </div>
                   <div className="flex-1">
