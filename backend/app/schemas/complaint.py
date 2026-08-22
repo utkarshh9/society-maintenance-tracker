@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from ..models.complaint import ComplaintStatus, ComplaintPriority, ComplaintCategory
 
@@ -29,17 +29,17 @@ class ComplaintHistoryResponse(BaseModel):
 class ComplaintResponse(BaseModel):
     id: int
     resident_id: int
-    resident_name: str
+    resident_name: str = ""  # Default empty string
     category: ComplaintCategory
     description: str
-    photo_url: Optional[str]
+    photo_url: Optional[str] = None
     status: ComplaintStatus
     priority: ComplaintPriority
     created_at: datetime
-    updated_at: Optional[datetime]
-    resolved_at: Optional[datetime]
+    updated_at: Optional[datetime] = None
+    resolved_at: Optional[datetime] = None
     is_overdue: bool = False
-    history: Optional[list[ComplaintHistoryResponse]] = []
+    history: List[ComplaintHistoryResponse] = []
     
     class Config:
         from_attributes = True
