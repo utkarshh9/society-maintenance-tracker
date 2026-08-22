@@ -21,7 +21,8 @@ import {
 export default function AdminComplaintDetails() {
   const params = useParams()
   const router = useRouter()
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin, isLoading } = useAuth()
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const [complaint, setComplaint] = useState<Complaint | null>(null)
   const [status, setStatus] = useState<ComplaintStatus>('OPEN')
   const [priority, setPriority] = useState<string>('MEDIUM')
@@ -31,9 +32,20 @@ export default function AdminComplaintDetails() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // 🔒 CRITICAL: Check if user is admin, redirect if not
   useEffect(() => {
-    fetchComplaint()
-  }, [])
+    if (isLoading) return
+
+    if (!isAdmin && !isRedirecting) {
+      setIsRedirecting(true)
+      router.replace('/unauthorized')
+      return
+    }
+
+    if (isAdmin) {
+      fetchComplaint()
+    }
+  }, [isAdmin, isLoading, router, isRedirecting])
 
   const fetchComplaint = async () => {
     try {

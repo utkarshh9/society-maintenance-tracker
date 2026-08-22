@@ -17,8 +17,9 @@ import {
 } from 'lucide-react'
 
 export default function AdminComplaints() {
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin, isLoading } = useAuth()
   const router = useRouter()
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [filters, setFilters] = useState({
     status: '',
@@ -27,9 +28,20 @@ export default function AdminComplaints() {
   })
   const [loading, setLoading] = useState(true)
 
+  // 🔒 CRITICAL: Check if user is admin, redirect if not
   useEffect(() => {
-    fetchComplaints()
-  }, [filters])
+    if (isLoading) return
+
+    if (!isAdmin && !isRedirecting) {
+      setIsRedirecting(true)
+      router.replace('/unauthorized')
+      return
+    }
+
+    if (isAdmin) {
+      fetchComplaints()
+    }
+  }, [isAdmin, isLoading, router, isRedirecting])
 
   const fetchComplaints = async () => {
     setLoading(true)

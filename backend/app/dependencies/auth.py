@@ -33,10 +33,12 @@ async def get_current_user(
     return user
 
 async def require_admin(current_user: User = Depends(get_current_user)):
+    """Strict admin check - returns 403 if not admin"""
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
+            detail="Admin access required. You do not have permission to view this page.",
+            headers={"WWW-Authenticate": "Bearer"},
         )
     return current_user
 

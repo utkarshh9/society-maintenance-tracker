@@ -10,26 +10,37 @@ import {
   LayoutDashboard, 
   FileText, 
   Bell, 
-  Users, 
   AlertTriangle,
-  TrendingUp,
   Clock,
   CheckCircle,
-  XCircle,
-  Settings
 } from 'lucide-react'
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin, isLoading } = useAuth()
   const router = useRouter()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [overdueComplaints, setOverdueComplaints] = useState<Complaint[]>([])
   const [recentComplaints, setRecentComplaints] = useState<Complaint[]>([])
   const [loading, setLoading] = useState(true)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
+  // 🔒 SECURITY: Check if user is admin
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
+    // Don't do anything while still loading auth
+    if (isLoading) return
+
+    // If not admin and not already redirecting, redirect to unauthorized
+    if (!isAdmin && !isRedirecting) {
+      setIsRedirecting(true)
+      router.replace('/unauthorized')
+      return
+    }
+
+    // If admin, fetch data
+    if (isAdmin) {
+      fetchDashboardData()
+    }
+  }, [isAdmin, isLoading, router, isRedirecting])
 
   const fetchDashboardData = async () => {
     try {
@@ -46,6 +57,20 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show loading while checking auth
+  if (isLoading || isRedirecting) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  // If not admin, don't render anything (will redirect via useEffect)
+  if (!isAdmin) {
+    return null
   }
 
   if (loading) {

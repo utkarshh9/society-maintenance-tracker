@@ -10,15 +10,25 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth()
+  const { isAuthenticated, isAdmin, isLoading, user } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
         router.push('/login')
-      } else if (requireAdmin && !isAdmin) {
-        router.push('/resident/dashboard')
+        return
+      }
+
+      if (requireAdmin && !isAdmin) {
+        router.push('/unauthorized')
+        return
+      }
+
+      // If user is admin and tries to access resident route, redirect to admin
+      if (isAdmin && !requireAdmin) {
+        // Allow admin to access resident routes too (for testing)
+        // But prevent resident from accessing admin routes
       }
     }
   }, [isLoading, isAuthenticated, isAdmin, requireAdmin, router])

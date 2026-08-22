@@ -4,6 +4,17 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User } from '../../src/types'
 import apiService from '../../src/lib/api'
 
+// Helper to set cookies
+const setCookie = (name: string, value: string, days: number = 7) => {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString()
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`
+}
+
+// Helper to delete cookie
+const deleteCookie = (name: string) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`
+}
+
 interface AuthContextType {
   user: User | null
   token: string | null
@@ -30,14 +41,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setToken(storedToken)
       setUser(JSON.parse(storedUser))
       
+      // Also set cookies for middleware
+      setCookie('token', storedToken)
+      setCookie('user', storedUser)
+      
       apiService.getCurrentUser()
         .then((userData) => {
           setUser(userData)
-          localStorage.setItem('user', JSON.stringify(userData))
+          const userStr = JSON.stringify(userData)
+          localStorage.setItem('user', userStr)
+          setCookie('user', userStr)
         })
         .catch(() => {
           localStorage.removeItem('token')
           localStorage.removeItem('user')
+          deleteCookie('token')
+          deleteCookie('user')
           setToken(null)
           setUser(null)
         })
@@ -51,8 +70,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     setToken(access_token)
     setUser(user)
+    
+    const userStr = JSON.stringify(user)
     localStorage.setItem('token', access_token)
-    localStorage.setItem('user', JSON.stringify(user))
+    localStorage.setItem('user', userStr)
+    
+    // Set cookies for middleware
+    setCookie('token', access_token)
+    setCookie('user', userStr)
   }
 
   const register = async (name: string, email: string, password: string) => {
@@ -64,6 +89,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    deleteCookie('token')
+    deleteCookie('user')
     window.location.href = '/login'
   }
 

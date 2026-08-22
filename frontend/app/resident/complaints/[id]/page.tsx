@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useAuth } from '../../../context/AuthContext'
 import apiService from '../../../../src/lib/api'
 import { Complaint } from '../../../../src/types'
-import { ArrowLeft, Clock, CheckCircle, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Clock, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react'
 
 export default function ComplaintDetails() {
   const params = useParams()
@@ -14,23 +14,45 @@ export default function ComplaintDetails() {
   const { user, logout } = useAuth()
   const [complaint, setComplaint] = useState<Complaint | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchComplaint()
-  }, [])
+    const fetchComplaint = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const complaintId = Number(params.id)
+        if (isNaN(complaintId) || complaintId <= 0) {
+          setError('Invalid complaint ID')
+          setLoading(false)
+          return
+        }
 
-  const fetchComplaint = async () => {
-    try {
-      const data = await apiService.getComplaint(Number(params.id))
-      setComplaint(data)
-    } catch (err: any) {
-      setError('Failed to load complaint')
-      console.error(err)
-    } finally {
-      setLoading(false)
+        const data = await apiService.getComplaint(complaintId)
+        setComplaint(data)
+      } catch (err: any) {
+        console.error('Error fetching complaint:', err)
+        
+        // Handle different error cases
+        if (err.response?.status === 404) {
+          setError('Complaint not found')
+        } else if (err.response?.status === 403) {
+          setError('You do not have permission to view this complaint')
+        } else if (err.code === 'ECONNABORTED') {
+          setError('Request timed out. Please try again.')
+        } else if (err.message === 'Network Error') {
+          setError('Network error. Please check your connection.')
+        } else {
+          setError('Failed to load complaint. Please try again.')
+        }
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+
+    fetchComplaint()
+  }, [params.id])
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -41,22 +63,104 @@ export default function ComplaintDetails() {
     }
   }
 
+  // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-gray-900">Complaint Details</h1>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
+                <button
+                  onClick={logout}
+                  className="text-sm text-red-600 hover:text-red-700"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     )
   }
 
+  // Error state - Complaint not found or other errors
   if (error || !complaint) {
+    const isNotFound = error === 'Complaint not found'
+    const isPermission = error === 'You do not have permission to view this complaint'
+    
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-red-600">{error || 'Complaint not found'}</div>
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-gray-900">
+                {isNotFound ? 'Complaint Not Found' : 'Error'}
+              </h1>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
+                <button
+                  onClick={logout}
+                  className="text-sm text-red-600 hover:text-red-700"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="bg-white rounded-xl shadow-md p-12 text-center">
+            <div className="flex justify-center mb-4">
+              <div className={`p-4 rounded-full ${isNotFound ? 'bg-yellow-50' : 'bg-red-50'}`}>
+                {isNotFound ? (
+                  <AlertTriangle className="h-12 w-12 text-yellow-500" />
+                ) : isPermission ? (
+                  <AlertCircle className="h-12 w-12 text-red-500" />
+                ) : (
+                  <AlertCircle className="h-12 w-12 text-red-500" />
+                )}
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {isNotFound ? 'Complaint Not Found' : isPermission ? 'Access Denied' : 'Something Went Wrong'}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {error}
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <button
+                onClick={() => router.back()}
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Go Back
+              </button>
+              <Link
+                href="/resident/complaints"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                View All Complaints
+              </Link>
+              <Link
+                href="/resident/dashboard"
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Go to Dashboard
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
+  // ✅ COMPLAINT FOUND - Render the details
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b">
@@ -90,7 +194,7 @@ export default function ComplaintDetails() {
         <div className="bg-white rounded-xl shadow-md p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 flex-wrap gap-2">
                 <h2 className="text-xl font-semibold">{complaint.category}</h2>
                 <span className={`px-3 py-1 text-sm rounded-full ${
                   complaint.status === 'OPEN' ? 'bg-yellow-100 text-yellow-800' :
@@ -100,7 +204,8 @@ export default function ComplaintDetails() {
                   {complaint.status}
                 </span>
                 {complaint.is_overdue && (
-                  <span className="px-3 py-1 text-sm rounded-full bg-red-100 text-red-800">
+                  <span className="px-3 py-1 text-sm rounded-full bg-red-100 text-red-800 flex items-center">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
                     Overdue
                   </span>
                 )}
@@ -142,27 +247,31 @@ export default function ComplaintDetails() {
         <div className="bg-white rounded-xl shadow-md p-6">
           <h3 className="text-lg font-semibold mb-4">Status History</h3>
           <div className="space-y-4">
-            {complaint.history.map((entry, index) => (
-              <div key={entry.id} className="flex items-start space-x-3">
-                <div className="shrink-0 mt-1">
-                  {getStatusIcon(entry.status)}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium">{entry.status}</span>
-                    <span className="text-sm text-gray-500">
-                      by {entry.actor_name}
-                    </span>
+            {complaint.history.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">No history available</p>
+            ) : (
+              complaint.history.map((entry) => (
+                <div key={entry.id} className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    {getStatusIcon(entry.status)}
                   </div>
-                  {entry.note && (
-                    <p className="text-sm text-gray-600 mt-1">{entry.note}</p>
-                  )}
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(entry.created_at).toLocaleString()}
-                  </p>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 flex-wrap gap-1">
+                      <span className="font-medium">{entry.status}</span>
+                      <span className="text-sm text-gray-500">
+                        by {entry.actor_name}
+                      </span>
+                    </div>
+                    {entry.note && (
+                      <p className="text-sm text-gray-600 mt-1">{entry.note}</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(entry.created_at).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

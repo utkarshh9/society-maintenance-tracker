@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '../context/AuthContext'
@@ -10,8 +10,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { login, isAuthenticated, isAdmin } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    // If already logged in, redirect to dashboard
+    if (isAuthenticated) {
+      if (isAdmin) {
+        router.push('/admin/dashboard')
+      } else {
+        router.push('/resident/dashboard')
+      }
+    }
+  }, [isAuthenticated, isAdmin, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,11 +31,15 @@ export default function LoginPage() {
 
     try {
       await login(email, password)
-      const user = JSON.parse(localStorage.getItem('user') || '{}')
-      if (user.role === 'admin') {
-        router.push('/admin/dashboard')
-      } else {
-        router.push('/resident/dashboard')
+      // After login, check user role from localStorage
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        const user = JSON.parse(userStr)
+        if (user.role === 'admin') {
+          router.push('/admin/dashboard')
+        } else {
+          router.push('/resident/dashboard')
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Login failed. Please try again.')

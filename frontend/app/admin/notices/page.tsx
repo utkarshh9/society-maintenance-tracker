@@ -17,8 +17,9 @@ import {
 } from 'lucide-react'
 
 export default function AdminNotices() {
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin, isLoading } = useAuth()
   const router = useRouter()
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const [notices, setNotices] = useState<Notice[]>([])
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -28,9 +29,20 @@ export default function AdminNotices() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // 🔒 CRITICAL: Check if user is admin, redirect if not
   useEffect(() => {
-    fetchNotices()
-  }, [])
+    if (isLoading) return
+
+    if (!isAdmin && !isRedirecting) {
+      setIsRedirecting(true)
+      router.replace('/unauthorized')
+      return
+    }
+
+    if (isAdmin) {
+      fetchNotices()
+    }
+  }, [isAdmin, isLoading, router, isRedirecting])
 
   const fetchNotices = async () => {
     try {
