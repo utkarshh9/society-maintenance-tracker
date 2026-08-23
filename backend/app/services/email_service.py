@@ -99,14 +99,14 @@ class EmailService:
     def send_important_notice_email(self, user: User, notice: Notice):
         """Send email when important notice is posted"""
         subject = f"🔔 Important Notice: {notice.title}"
-        
+
         # Get creator name from database
         from ..core.database import SessionLocal
         db = SessionLocal()
         creator = db.query(User).filter(User.id == notice.created_by).first()
         creator_name = creator.name if creator else "Unknown"
         db.close()
-        
+
         html = f"""
         <!DOCTYPE html>
         <html>
@@ -146,15 +146,15 @@ class EmailService:
                     <div style="margin-bottom: 16px;">
                         <span class="important-badge">⚠️ Important</span>
                     </div>
-                    
+
                     <h2>{notice.title}</h2>
                     <p style="font-size: 16px; line-height: 1.8;">{notice.content}</p>
-                    
+
                     <div style="background: white; padding: 12px; border-radius: 8px; margin: 16px 0; border: 1px solid #e5e7eb; font-size: 14px; color: #6B7280;">
                         <p style="margin: 4px 0;"><strong>Posted by:</strong> {creator_name}</p>
                         <p style="margin: 4px 0;"><strong>Date:</strong> {notice.created_at.strftime('%B %d, %Y at %I:%M %p')}</p>
                     </div>
-                    
+
                     <p>
                         <a href="{settings.FRONTEND_URL}/resident/notices" class="button">
                             View All Notices
@@ -169,7 +169,7 @@ class EmailService:
         </body>
         </html>
         """
-        
+
         try:
             response = resend.Emails.send({
                 "from": settings.FROM_EMAIL,
@@ -178,6 +178,20 @@ class EmailService:
                 "html": html
             })
             print(f"✅ Important notice email sent to {user.email}")
+            return response
+        except Exception as e:
+            print(f"❌ Email error: {e}")
+            return None
+
+    def send_email(self, to_email: str, subject: str, html: str):
+        """Generic email sender"""
+        try:
+            response = resend.Emails.send({
+                "from": settings.FROM_EMAIL,
+                "to": to_email,
+                "subject": subject,
+                "html": html
+            })
             return response
         except Exception as e:
             print(f"❌ Email error: {e}")
