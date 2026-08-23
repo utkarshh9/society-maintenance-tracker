@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from ..core.database import get_db
 from ..models.user import User, UserRole
@@ -39,7 +39,8 @@ async def get_notices(
 async def create_notice(
     notice_data: NoticeCreate,
     current_user: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = BackgroundTasks()  # ✅ Added BackgroundTasks
 ):
     """Create a new notice (Admin only)"""
     new_notice = Notice(
@@ -53,11 +54,15 @@ async def create_notice(
     db.commit()
     db.refresh(new_notice)
     
-    # Send email if important
+    # 📧 Send email if important (in background)
     if notice_data.is_important:
         residents = db.query(User).filter(User.role == UserRole.RESIDENT).all()
         for resident in residents:
-            email_service.send_important_notice_email(resident, new_notice)
+            background_tasks.add_task(
+                email_service.send_important_notice_email,
+                resident,
+                new_notice
+            )
     
     return NoticeResponse(
         id=new_notice.id,

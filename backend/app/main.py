@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .core.database import engine, Base
-from .routers import auth_router, complaints_router, notices_router, dashboard_router, upload_router
+from .routers import auth_router, complaints_router, notices_router, dashboard_router, upload_router, email_router
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -27,6 +27,7 @@ app.include_router(complaints_router, prefix="/api/complaints", tags=["complaint
 app.include_router(notices_router, prefix="/api/notices", tags=["notices"])
 app.include_router(dashboard_router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(upload_router, prefix="/api/upload", tags=["upload"])
+app.include_router(email_router, prefix="/api/email", tags=["email"])
 
 @app.get("/")
 async def root():

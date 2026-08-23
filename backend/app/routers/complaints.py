@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
@@ -216,7 +216,8 @@ async def update_status(
     complaint_id: int,
     status_data: ComplaintUpdateStatus,
     current_user: User = Depends(require_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = BackgroundTasks()  # ✅ Added BackgroundTasks
 ):
     """Update complaint status (Admin only) - Records history automatically"""
     complaint = db.query(Complaint).filter(Complaint.id == complaint_id).first()
@@ -251,11 +252,14 @@ async def update_status(
     db.add(history_entry)
     db.commit()
     
-    # Send email notification to resident
+    # 📧 Send email notification to resident (in background)
     resident = db.query(User).filter(User.id == complaint.resident_id).first()
     if resident:
-        email_service.send_status_update_email(
-            resident, complaint, status_data.note
+        background_tasks.add_task(
+            email_service.send_status_update_email,
+            resident,
+            complaint,
+            status_data.note
         )
     
     history = get_complaint_history(complaint_id, db)
