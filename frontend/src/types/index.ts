@@ -52,7 +52,7 @@ export interface Complaint {
 export interface ComplaintCreate {
   category: ComplaintCategory;
   description: string;
-  photo_url?: string | null;
+  photo_url?: string;
 }
 
 export interface Notice {

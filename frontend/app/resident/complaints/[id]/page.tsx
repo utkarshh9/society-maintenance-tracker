@@ -21,7 +21,7 @@ export default function ComplaintDetails() {
       try {
         setLoading(true)
         setError(null)
-        
+
         const complaintId = Number(params.id)
         if (isNaN(complaintId) || complaintId <= 0) {
           setError('Invalid complaint ID')
@@ -33,8 +33,7 @@ export default function ComplaintDetails() {
         setComplaint(data)
       } catch (err: any) {
         console.error('Error fetching complaint:', err)
-        
-        // Handle different error cases
+
         if (err.response?.status === 404) {
           setError('Complaint not found')
         } else if (err.response?.status === 403) {
@@ -56,10 +55,14 @@ export default function ComplaintDetails() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'OPEN': return <AlertCircle className="h-5 w-5 text-yellow-500" />
-      case 'IN_PROGRESS': return <Clock className="h-5 w-5 text-blue-500" />
-      case 'RESOLVED': return <CheckCircle className="h-5 w-5 text-green-500" />
-      default: return null
+      case 'OPEN':
+        return <AlertCircle className="h-5 w-5 text-yellow-500" />
+      case 'IN_PROGRESS':
+        return <Clock className="h-5 w-5 text-blue-500" />
+      case 'RESOLVED':
+        return <CheckCircle className="h-5 w-5 text-green-500" />
+      default:
+        return null
     }
   }
 
@@ -72,8 +75,8 @@ export default function ComplaintDetails() {
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-bold text-gray-900">Complaint Details</h1>
               <div className="flex items-center space-x-6">
-                <Link 
-                  href="/resident/notices" 
+                <Link
+                  href="/resident/notices"
                   className="text-sm text-yellow-600 hover:text-yellow-800 font-medium flex items-center"
                 >
                   <Bell className="h-4 w-4 mr-1" />
@@ -97,11 +100,11 @@ export default function ComplaintDetails() {
     )
   }
 
-  // Error state - Complaint not found or other errors
+  // Error state
   if (error || !complaint) {
     const isNotFound = error === 'Complaint not found'
     const isPermission = error === 'You do not have permission to view this complaint'
-    
+
     return (
       <div className="min-h-screen bg-gray-50">
         <nav className="bg-white shadow-sm border-b">
@@ -111,8 +114,8 @@ export default function ComplaintDetails() {
                 {isNotFound ? 'Complaint Not Found' : 'Error'}
               </h1>
               <div className="flex items-center space-x-6">
-                <Link 
-                  href="/resident/notices" 
+                <Link
+                  href="/resident/notices"
                   className="text-sm text-yellow-600 hover:text-yellow-800 font-medium flex items-center"
                 >
                   <Bell className="h-4 w-4 mr-1" />
@@ -145,9 +148,7 @@ export default function ComplaintDetails() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               {isNotFound ? 'Complaint Not Found' : isPermission ? 'Access Denied' : 'Something Went Wrong'}
             </h2>
-            <p className="text-gray-600 mb-6">
-              {error}
-            </p>
+            <p className="text-gray-600 mb-6">{error}</p>
             <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => router.back()}
@@ -180,12 +181,10 @@ export default function ComplaintDetails() {
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Complaint #{complaint.id}
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900">Complaint #{complaint.id}</h1>
             <div className="flex items-center space-x-6">
-              <Link 
-                href="/resident/notices" 
+              <Link
+                href="/resident/notices"
                 className="text-sm text-yellow-600 hover:text-yellow-800 font-medium flex items-center"
               >
                 <Bell className="h-4 w-4 mr-1" />
@@ -217,11 +216,15 @@ export default function ComplaintDetails() {
             <div>
               <div className="flex items-center space-x-3 flex-wrap gap-2">
                 <h2 className="text-xl font-semibold">{complaint.category}</h2>
-                <span className={`px-3 py-1 text-sm rounded-full ${
-                  complaint.status === 'OPEN' ? 'bg-yellow-100 text-yellow-800' :
-                  complaint.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
-                  'bg-green-100 text-green-800'
-                }`}>
+                <span
+                  className={`px-3 py-1 text-sm rounded-full ${
+                    complaint.status === 'OPEN'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : complaint.status === 'IN_PROGRESS'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}
+                >
                   {complaint.status}
                 </span>
                 {complaint.is_overdue && (
@@ -232,11 +235,18 @@ export default function ComplaintDetails() {
                 )}
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                Priority: <span className={`font-medium ${
-                  complaint.priority === 'HIGH' ? 'text-red-600' :
-                  complaint.priority === 'MEDIUM' ? 'text-yellow-600' :
-                  'text-green-600'
-                }`}>{complaint.priority}</span>
+                Priority:{' '}
+                <span
+                  className={`font-medium ${
+                    complaint.priority === 'HIGH'
+                      ? 'text-red-600'
+                      : complaint.priority === 'MEDIUM'
+                      ? 'text-yellow-600'
+                      : 'text-green-600'
+                  }`}
+                >
+                  {complaint.priority}
+                </span>
               </p>
             </div>
             <div className="text-right text-sm text-gray-500">
@@ -273,19 +283,13 @@ export default function ComplaintDetails() {
             ) : (
               complaint.history.map((entry) => (
                 <div key={entry.id} className="flex items-start space-x-3">
-                  <div className="shrink-0 mt-1">
-                    {getStatusIcon(entry.status)}
-                  </div>
+                  <div className="shrink-0 mt-1">{getStatusIcon(entry.status)}</div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 flex-wrap gap-1">
                       <span className="font-medium">{entry.status}</span>
-                      <span className="text-sm text-gray-500">
-                        by {entry.actor_name}
-                      </span>
+                      <span className="text-sm text-gray-500">by {entry.actor_name}</span>
                     </div>
-                    {entry.note && (
-                      <p className="text-sm text-gray-600 mt-1">{entry.note}</p>
-                    )}
+                    {entry.note && <p className="text-sm text-gray-600 mt-1">{entry.note}</p>}
                     <p className="text-xs text-gray-400 mt-1">
                       {new Date(entry.created_at).toLocaleString()}
                     </p>

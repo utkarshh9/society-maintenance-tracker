@@ -121,6 +121,19 @@ class ApiService {
     const response = await this.api.get('/dashboard/overdue');
     return response.data;
   }
+
+  // Upload endpoints
+  async uploadPhoto(file: File): Promise<{ url: string }> {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    const response = await this.api.post('/upload/photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  }
 }
 
 export const apiService = new ApiService();
