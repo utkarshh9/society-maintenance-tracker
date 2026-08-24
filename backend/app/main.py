@@ -21,7 +21,10 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:8000"],
+    allow_origins=["http://localhost:3000",
+                   "http://localhost:8000",
+                   "https://society-maintenance-tracker-platform.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
